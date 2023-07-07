@@ -12,7 +12,7 @@ export const openaiRouter = createTRPCRouter({
     prompt: z.string(),
   }))
   .mutation(
-    async ({ input }) => await useAI(input.prompt)
+    async ({ input }) => await useAI({prompt: input.prompt})
 )
 
 });

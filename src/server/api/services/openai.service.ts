@@ -1,21 +1,33 @@
 import { openai } from "../utils/openai"
-import { ChatCompletionRequestMessage } from 'openai'
+import { type ChatCompletionRequestMessage } from 'openai'
  
-export async function useAI(prompt: string) {
+export async function useAI({
+    prompt,
+    promptType,
+}:{
+    prompt: string
+    promptType: string
+}
+
+) {
+
+    if(promptType === 'getQuestions') {
+
     let response
+
     const setup: ChatCompletionRequestMessage = {
         role: 'system',
         content: `You have just receieved a problem a developer is trying to solve. This developer only understands javascript arrays, so everything you return must be in Javascript format. Give the developer 5 questions they should ask themselves to better understand the problem. The questions should be in an array of objects, like this:
         [
             {
-                id: 1,
-                question: "What is the problem?",
-                answer: ""
+                "id": "1",
+                "question": "What is the problem?",
+                "answer": ""
             },
             {
-                id: 2,
-                question: "What parts of the codebase will this feature affect?",
-                answer: ""
+                "id": "2",
+                "question": "What parts of the codebase will this feature affect?",
+                "answer": ""
             }
         ]
 
@@ -29,33 +41,23 @@ export async function useAI(prompt: string) {
         content: prompt
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
    response = await openai.createChatCompletion({
     model: 'gpt-3.5-turbo',
-    temperature: 0.6,
+    temperature: 0.9,
     messages: [input, setup],
   })
   if(response.data.choices[0]?.message?.content){
-    const questions = JSON.parse(response.data.choices[0].message.content)
-    
-    const askQuestion: ChatCompletionRequestMessage = {
-        role: 'system',
-        content: `You will receieve an object containing a question. You must ask the user/developer this question.`,
-  }
-
-  return response.data.choices[0].message.content
+    console.log(response.data.choices[0].message.content)
+    const firstQuestion = JSON.parse(response.data.choices[0].message.content)[0].question
+  return firstQuestion
 
 }
+
+}
+
+if(promptType === 'askQuestionByIndex'){
+    
+}
+
+
 }
