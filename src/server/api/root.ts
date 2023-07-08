@@ -1,4 +1,5 @@
 import { openaiRouter } from "~/server/api/routers/openai.router";
+import { crowRouter } from "~/server/api/routers/crow.router";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +9,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   ai: openaiRouter,
+  crow: crowRouter,
 });
 
 // export type definition of API
