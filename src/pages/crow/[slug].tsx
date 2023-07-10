@@ -10,13 +10,20 @@ import {
   TabsTrigger,
 } from  "../../components/ui/tabs"
 import { Input } from '~/components/ui/input'
+import { Textarea } from '~/components/ui/textarea'
  
 export default function Page() {
   const [ crowData, setCrowData ] = useState<any | undefined>(undefined)
+  const [ issueInput, setIssueInput ] = useState<string>('')
   const router = useRouter()
 
   const crow = router.query.slug
   const { data } = api.crow.getCrow.useQuery({id: crow as string})
+
+
+  const getQuestions = async () => {
+
+  }
 
   return (
     <>
@@ -35,10 +42,11 @@ export default function Page() {
       <TabsContent value="preflight">
       {
         data?.preflightQuestions.length === 0 ? (
-          <div className="flex text-center py-5 my-5 gap-10 w-4/12 mx-auto h-full flex-col items-center justify-center">
-            <h1 className="text-2xl font-bold text-gray-100">Looks like you haven't generated any questions. Lets fix that for you.</h1>
-            <p>Describe your issue:</p>
-            <Input />
+          <div className="flex text-center py-5 my-5 w-4/12 mx-auto h-full flex-col items-center justify-center">
+            <h1 className="text-2xl font-bold text-gray-100 mb-10">Looks like you haven't generated any questions. Lets fix that for you.</h1>
+            <p className='text-gray-100 text-xl sr-only'>Describe your issue:</p>
+            <Textarea value={issueInput} onChange={(e) => setIssueInput(e.currentTarget.value)} className='text-gray-100 mb-1' placeholder='describe your issue...' />
+            <Button className='w-full mt-0' variant={'secondary'} onClick={getQuestions}>Generate Questions</Button>
           </div>
         ):(
           <div className="flex  w-full h-full flex-col items-center justify-center">
