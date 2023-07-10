@@ -12,7 +12,7 @@ const PreflightList = ( { preflights} : {preflights: Preflight[]} ) => {
 
 
     return (
-        <div className="grid grid-cols-2 gap-5 mt-20 w-2/3 mx-auto">
+        <div className="grid grid-cols-2 gap-5 pt-20 mt-auto w-2/3 mx-auto">
             {
                 preflights.map((preflight: Preflight) => (
                     <Preflight preflight={preflight} />

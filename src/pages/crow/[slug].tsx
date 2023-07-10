@@ -54,7 +54,7 @@ export default function Page() {
       <TabsContent className='min-h-[65vh]' value="preflight">
       {
         data?.preflightQuestions.length === 0 ? (
-          <div className="flex text-center py-5 my-5 w-4/12 mx-auto h-full flex-col items-center justify-center">
+          <div className="flex text-center my-5 w-4/12 mx-auto flex-col items-center justify-center">
             <h1 className="text-2xl font-bold text-gray-100 mb-10">Looks like you haven't generated any questions. Lets fix that for you.</h1>
             <p className='text-gray-100 text-xl sr-only'>Describe your issue:</p>
             <Textarea value={issueInput} onChange={(e) => setIssueInput(e.currentTarget.value)} className='text-gray-100 mb-1' placeholder='describe your issue...' />
