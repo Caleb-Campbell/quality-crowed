@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Layout } from '~/Templates/Layout'
 import { Button } from '~/components/ui/button'
 import { api } from '~/utils/api'
@@ -11,6 +11,7 @@ import {
 } from  "../../components/ui/tabs"
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
+import PreflightList from '~/components/micro/preflights'
  
 export default function Page() {
   const [ crowData, setCrowData ] = useState<any | undefined>(undefined)
@@ -20,10 +21,21 @@ export default function Page() {
   const crow = router.query.slug
   const { data } = api.crow.getCrow.useQuery({id: crow as string})
 
+  const createQuestions = api.ai.createQuestions.useMutation()
+
 
   const getQuestions = async () => {
+    if(issueInput === '') return
 
+    const { data } = await createQuestions.mutateAsync({prompt: issueInput, crowId: crow as string})
+    console.log(data)
   }
+
+  useEffect(() => {
+    if(data) {
+      setCrowData(data)
+    }
+  }, [createQuestions.isSuccess, data])
 
   return (
     <>
@@ -39,7 +51,7 @@ export default function Page() {
         <TabsTrigger value="steps">Steps</TabsTrigger>
         <TabsTrigger value="pr">PR</TabsTrigger>
       </TabsList>
-      <TabsContent value="preflight">
+      <TabsContent className='min-h-[65vh]' value="preflight">
       {
         data?.preflightQuestions.length === 0 ? (
           <div className="flex text-center py-5 my-5 w-4/12 mx-auto h-full flex-col items-center justify-center">
@@ -49,22 +61,18 @@ export default function Page() {
             <Button className='w-full mt-0' variant={'secondary'} onClick={getQuestions}>Generate Questions</Button>
           </div>
         ):(
-          <div className="flex  w-full h-full flex-col items-center justify-center">
+          <>
             {
-            data?.preflightQuestions.map((question: any) => (
-              <div className="flex flex-col w-full">
-                <h1 className="text-2xl font-bold text-gray-100">{JSON.stringify(question)}</h1>
-              </div>
-            )
-            )}
-          </div>
+              data?.preflightQuestions && <PreflightList preflights={data?.preflightQuestions} />
+            }
+            </>
         )
       }
       </TabsContent>
-      <TabsContent value="steps">
+      <TabsContent className='min-h-[65vh]' value="steps">
        // slide two
       </TabsContent>
-      <TabsContent value="pr">
+      <TabsContent className='min-h-[65vh]' value="pr">
        // slide two
       </TabsContent>
     </Tabs>
