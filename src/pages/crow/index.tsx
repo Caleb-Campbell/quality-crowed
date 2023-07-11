@@ -31,6 +31,7 @@ export default function Crow() {
     if(!session) return console.error('no session')
     
     createCrow.mutate({name: titleInput, userId: session.user.id})
+    window.location.reload()
   }
   
   
