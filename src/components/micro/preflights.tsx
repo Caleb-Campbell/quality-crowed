@@ -27,10 +27,9 @@ export default PreflightList
 const Preflight = ({preflight} : { preflight: Preflight}) => {
     
         return (
-            <div key={preflight.id} className="rounded-xl bg-foreground p-5 opacity-80 shadow-lg">
-                <p className="text-gray-100">{preflight.id}</p>
-                <strong className="text-gray-100">{preflight.question}</strong>
-                <Textarea className="w-full text-gray-100" />
+            <div key={preflight.id} className="rounded-xl bg-gray-100 p-5 opacity-70 shadow-lg">
+                <strong className="my-2 py-2">{preflight.question}</strong>
+                <Textarea className="w-full text-white py-2 bg-foreground opacity-40" />
             </div>
         )
 }
