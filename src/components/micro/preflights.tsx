@@ -10,7 +10,7 @@ import { api } from "~/utils/api"
 export type Preflight = {
     id: string
     question: string
-    answer?: string
+    response?: string
     setButton?: boolean
 }
 
@@ -48,19 +48,19 @@ const Preflight = ({preflight, saveResponse} : { preflight: Preflight, saveRespo
     const [ selectedQuestion, setSelectedQuestion ] = useState<Preflight | undefined>(undefined)
 
     const submitQuestion = () => {
-        if(preflight.answer !== selectedQuestion?.answer){
-            saveResponse(selectedQuestion?.answer!, preflight.id)
+        if(preflight.response !== selectedQuestion?.response){
+            saveResponse(selectedQuestion?.response!, preflight.id)
         }
     }
 
     
         return (
-            <Collapsible key={preflight.id} className="rounded-xl bg-foreground p-5 opacity-80 shadow-lg">
+            <Collapsible key={preflight.id} onClick={()=>setSelectedQuestion(preflight)} className="rounded-xl bg-foreground p-5 opacity-80 shadow-lg">
                 <CollapsibleTrigger>
                 <strong className="text-gray-100">{preflight.question}</strong>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                <Textarea onFocus={()=>setSelectedQuestion(preflight)} onChange={(e)=>selectedQuestion && setSelectedQuestion({...selectedQuestion, answer: e.currentTarget.value || selectedQuestion.answer})} onBlur={()=>submitQuestion()} value={selectedQuestion?.answer} className="w-full text-gray-100" />
+                <Textarea defaultValue={preflight.response} onFocus={()=>setSelectedQuestion(preflight)} onChange={(e)=>selectedQuestion && setSelectedQuestion({...selectedQuestion, response: e.currentTarget.value || selectedQuestion.response})} onBlur={()=>submitQuestion()} value={selectedQuestion?.response} className="w-full text-gray-100" />
                 </CollapsibleContent>
             </Collapsible>
         )
