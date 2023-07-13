@@ -13,11 +13,14 @@ import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import PreflightList from '~/components/micro/preflights'
 import { Preflight } from '~/components/micro/preflights'
+import { SettingsBar } from '~/components/micro/settingsBar'
+import { Modal } from '~/components/micro/Modal'
  
 export default function Page() {
   const [ crowData, setCrowData ] = useState<any | undefined>(undefined)
   const [ issueInput, setIssueInput ] = useState<string>('')
-  const [ questionState, setQuestionState ] = useState<Preflight[] | undefined>(undefined)
+  const [ showTechList, setShowTechList ] = useState<boolean>(false)
+
   const router = useRouter()
 
   const crow = router.query.slug
@@ -33,6 +36,19 @@ export default function Page() {
     console.log(data)
   }
 
+  const deleteHandler = api.crow.deleteCrow.useMutation()
+  const archiveHandler = api.crow.archiveCrow.useMutation()
+
+  
+  const deleteCrow = () => {
+    deleteHandler.mutate({id: crow as string})
+    router.push('/crow')
+  }
+
+  const archiveCrow = () => {
+    archiveHandler.mutate({id: crow as string})
+  }
+
   useEffect(() => {
     if(data) {
       setCrowData(data)
@@ -41,6 +57,12 @@ export default function Page() {
 
   return (
     <>
+      <Modal open={showTechList} setOpen={setShowTechList}>
+        <div className='w-96 h-96'>
+          <p className='text-gray-100 text-2xl text-center pt-3'>Tech Used</p>
+        </div>
+      </Modal>
+
     <Button className='absolute z-50 top-10 left-10 bg-background'>
       <a href='/crow'>
         Back
@@ -78,6 +100,9 @@ export default function Page() {
        // slide two
       </TabsContent>
     </Tabs>
+    <div className='absolute w-full bottom-5'>
+      <SettingsBar openTechList={()=>setShowTechList(true)} deletefunc={deleteCrow} archivefunc={archiveCrow} />
+    </div>
     </Layout>
     </>
   )

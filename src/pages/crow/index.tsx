@@ -47,15 +47,16 @@ export default function Crow() {
 
   return (
     <>
-    <Button className='absolute z-50 top-10 left-10 bg-background opacity-70'>
+    <Layout>
+    <Button className='absolute z-30 top-3 left-3 hover:opacity-100 transition-opacity'>
       <a href='/'>
         Back
       </a>
     </Button>
-    <Layout>
+      <div className='pt-10'>
     <Dialog>
       <DialogTrigger asChild>
-        <Button className='self-end mb-10 opacity-40 hover:opacity-100 transition-opacity'>
+        <Button className='absolute top-3 right-3 opacity-40 hover:opacity-100 transition-opacity'>
           Add an Issue
         </Button>
       </DialogTrigger>
@@ -73,6 +74,7 @@ export default function Crow() {
     </Dialog>
       <div className=" h-[80vh] flex overflow-hidden bg-background">
         <StackedList crows={crows} />
+      </div>
       </div>
     </Layout>
     </>

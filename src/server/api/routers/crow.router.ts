@@ -19,6 +19,9 @@ export const crowRouter = createTRPCRouter({
                 preflightQuestions: true,
                 steps: true,
                 prQuestions: true,
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
         })
         return crows
@@ -65,7 +68,38 @@ export const crowRouter = createTRPCRouter({
         })
         return crow
     }
-    )
+    ),
+
+    deleteCrow: publicProcedure
+    .input(z.object({
+        id: z.string(),
+    }))
+    .mutation( async ({ input }) => {
+        const crow = await prisma.crow.delete({
+            where: {
+                id: input.id
+            }
+        })
+        return crow
+    }
+    ),
+
+    archiveCrow: publicProcedure
+    .input(z.object({
+        id: z.string(),
+    }))
+    .mutation( async ({ input }) => {
+        const crow = await prisma.crow.update({
+            where: {
+                id: input.id
+            },
+            data: {
+                archived: true
+            }
+        })
+        return crow
+    }
+    ),
     
 
 })

@@ -10,7 +10,7 @@ import { api } from "~/utils/api"
 export type Preflight = {
     id: string
     question: string
-    response?: string
+    response: string | null | undefined
     setButton?: boolean
 }
 
@@ -60,7 +60,7 @@ const Preflight = ({preflight, saveResponse} : { preflight: Preflight, saveRespo
                 <strong className="text-gray-100">{preflight.question}</strong>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                <Textarea defaultValue={preflight.response} onFocus={()=>setSelectedQuestion(preflight)} onChange={(e)=>selectedQuestion && setSelectedQuestion({...selectedQuestion, response: e.currentTarget.value || selectedQuestion.response})} onBlur={()=>submitQuestion()} value={selectedQuestion?.response} className="w-full text-gray-100" />
+                        <Textarea onFocus={()=>setSelectedQuestion(preflight)} onChange={(e)=>selectedQuestion && setSelectedQuestion({...selectedQuestion, response: e.currentTarget.value || selectedQuestion.response})} onBlur={()=>submitQuestion()} value={selectedQuestion?.response!} className="w-full text-gray-100" />
                 </CollapsibleContent>
             </Collapsible>
         )
