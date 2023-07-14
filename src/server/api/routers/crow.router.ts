@@ -100,6 +100,49 @@ export const crowRouter = createTRPCRouter({
         return crow
     }
     ),
+
+    addTech: publicProcedure
+    .input(z.object({
+        crowId: z.string(),
+        tech: z.string(),
+    }))
+    .mutation( async ({ input }) => {
+        const crow = await prisma.crow.findFirstOrThrow({
+            where: {
+                id: input.crowId
+            }
+        })
+        return await prisma.crow.update({
+            where: {
+                id: input.crowId
+            },
+            data: {
+                tech: [input.tech, ...crow.tech]
+            }
+        })
+    }
+    ),
     
+    deleteTech: publicProcedure
+    .input(z.object({
+        crowId: z.string(),
+        tech: z.string(),
+    }))
+    .mutation( async ({ input }) => {
+        const crow = await prisma.crow.findFirstOrThrow({
+            where: {
+                id: input.crowId
+            }
+        })
+        return await prisma.crow.update({
+            where: {
+                id: input.crowId
+            },
+            data: {
+                tech: crow.tech.filter(t => t !== input.tech)
+            }
+        })
+    }
+    ),
 
 })

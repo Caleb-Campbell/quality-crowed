@@ -16,6 +16,7 @@ export default function Crow() {
   const [crows, setCrows] = useState<any[] | undefined>([])
 
   const { data: session } = useSession()
+  const context = api.useContext()
 
   const createCrow = api.crow.create.useMutation()
   
@@ -30,7 +31,11 @@ export default function Crow() {
     if(!titleInput) return console.error('no title')
     if(!session) return console.error('no session')
     
-    createCrow.mutate({name: titleInput, userId: session.user.id})
+    createCrow.mutate({name: titleInput, userId: session.user.id}, {
+      onSuccess: () => {
+        context.crow.invalidate()
+      }
+    })
     window.location.reload()
   }
   
