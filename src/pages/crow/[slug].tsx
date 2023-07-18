@@ -15,22 +15,30 @@ import PreflightList from '~/components/micro/preflights'
 import { Preflight } from '~/components/micro/preflights'
 import { SettingsBar } from '~/components/micro/settingsBar'
 import { Modal } from '~/components/micro/Modal'
-import { X } from 'lucide-react'
+import { Trash2, X } from 'lucide-react'
+import { Editor } from '@monaco-editor/react'
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '~/components/ui/dialog'
+import { DialogHeader } from '~/components/ui/dialog'
+import { Snippet, Step } from '@prisma/client'
+
+type StepWithSnippet = Step & {snippet: Snippet[]}
  
 export default function Page() {
   const [ crowData, setCrowData ] = useState<any | undefined>(undefined)
   const [ issueInput, setIssueInput ] = useState<string>('')
   const [ showTechList, setShowTechList ] = useState<boolean>(false)
   const [ techInput, setTechInput ] = useState<string>('')
+  const [ stepTitleInput, setStepTitleInput ] = useState<{title: string, content:string}>({
+    title: '',
+    content: ''
+  })
 
   const router = useRouter()
   const context = api.useContext()
 
   const crow = router.query.slug
   const { data, isLoading } = api.crow.getCrow.useQuery({id: crow as string})
-
   const createQuestions = api.ai.createQuestions.useMutation()
-
 
   const getQuestions = async () => {
     if(issueInput === '') return
@@ -47,6 +55,9 @@ export default function Page() {
   const archiveHandler = api.crow.archiveCrow.useMutation()
   const addTech = api.crow.addTech.useMutation()
   const deleteTech = api.crow.deleteTech.useMutation()
+  const createStep = api.step.createStep.useMutation()
+  const newSnippet = api.step.createSnippet.useMutation()
+  const deleteSnippet = api.step.deleteSnippet.useMutation()
   
   const deleteCrow = () => {
     deleteHandler.mutate({id: crow as string}, {
@@ -55,6 +66,7 @@ export default function Page() {
       }
     })
     router.push('/crow')
+    context.crow.invalidate()
   }
 
   const archiveCrow = () => {
@@ -80,6 +92,38 @@ export default function Page() {
     })
     setTechInput('')
   }
+
+  const createNewSnippet = () => {
+    if(!data?.steps[0]?.id) return console.error('no step id')
+    newSnippet.mutate({stepId: data!.steps[0]?.id}, {
+      onSuccess: () => {
+        context.crow.invalidate()
+      }
+    })
+  }
+
+  const removeSnippet = (id: string) => {
+    deleteSnippet.mutate({snippetId: id}, {
+      onSuccess: () => {
+        context.crow.invalidate()
+      }
+    })
+  }
+
+  const submitNewStep = (e: FormEvent) => {
+    e.preventDefault()
+    createStep.mutate({title: stepTitleInput.title, content: stepTitleInput.content, crowId: data!.id}, {
+      onSuccess: () => {
+        context.crow.invalidate()
+      }
+    })
+    setStepTitleInput({
+      title: '',
+      content: ''
+    })
+  }
+
+
 
   return (
     <>
@@ -137,8 +181,68 @@ export default function Page() {
         )
       }
       </TabsContent>
-      <TabsContent className='min-h-[65vh]' value="steps">
-       // slide two
+      <TabsContent className='min-h-[65vh] overflow-y-scroll' value="steps">
+        <div className='h-40 w-6/12 mx-auto'>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className='w-full'>
+              Add a Step
+            </Button>
+          </DialogTrigger>
+          <DialogContent className='opacity-70'>
+            <DialogHeader>
+              <DialogTitle className='text-gray-100'>Title Your Step</DialogTitle>
+            </DialogHeader>
+              <form onSubmit={submitNewStep}>
+                <Input value={stepTitleInput.title} onChange={(e) => setStepTitleInput({...stepTitleInput, title: e.currentTarget.value})} className='focus:border-none text-lg text-gray-100' />
+                <Textarea value={stepTitleInput.content} onChange={(e) => setStepTitleInput({...stepTitleInput, content: e.currentTarget.value})} className='focus:border-none mt-10 text-lg text-gray-100' rows={4} />
+                <Button type='submit' className='self-end mt-10 opacity-40 hover:opacity-100 transition-opacity'>
+                  Create
+                </Button>
+              </form>
+          </DialogContent>
+        </Dialog>
+          {
+            data?.steps.length === 0 && (
+              <div className="flex text-center w-4/12 mx-auto flex-col items-center justify-center">
+                <h1 className="text-2xl font-bold text-gray-100 mb-10">No Steps</h1>
+              </div>
+            )
+          }
+          {
+            data?.steps.map((step: any) => (
+              <div className='bg-gray-100 opacity-70 mt-10 p-10 h-[720px] overflow-y-scroll rounded-xl'>
+                <p className='text-foreground text-center text-xl mb-3'>{step.title}</p>
+                    <Button onClick={createNewSnippet} className='w-full mb-10'>
+                      Add Code Snippet
+                    </Button>
+                    <div className='flex flex-col gap-20'>
+                      {
+                        step.snippet && step.snippet.map((snip: Snippet) => {
+                          return (
+                            <div key={snip.id} className='h-[200px]'>
+                            <Editor
+                              defaultValue={snip.content}
+                              language='typescript'
+                              theme='dark'
+                              className='max-h-[300px] rounded-xl'
+                              value={'this doesnt currently save'}
+                              onChange={(e) => console.log(e
+                                )}
+                                />
+                              <div className='mb-0 flex justify-end'>
+                                <Button onClick={()=>removeSnippet(snip.id)} className='w-2/12 p-0' variant='ghost'><Trash2 /></Button>
+                              </div>
+                            </div>
+                                )
+                          })
+                      }
+                    </div>
+              </div>
+            ))
+          }
+          {/* <Editor language='typescript' theme='dark' className='max-h-[300px]' /> */}
+        </div>
       </TabsContent>
       <TabsContent className='min-h-[65vh]' value="pr">
        // slide two

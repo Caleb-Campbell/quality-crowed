@@ -138,15 +138,6 @@ export default function Example() {
           />
         </div>
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
-          <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-            <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-100 ring-1 ring-gray-100/10 hover:ring-gray-200/20">
-              Announcing our next round of funding.{' '}
-              <a href="#" className="font-semibold text-indigo-200">
-                <span className="absolute inset-0" aria-hidden="true" />
-                Read more <span aria-hidden="true">&rarr;</span>
-              </a>
-            </div>
-          </div>
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-sky-100 sm:text-6xl">
               Pseudo Crowed
@@ -160,9 +151,6 @@ export default function Example() {
                 className="rounded-md bg-foreground px-3.5 hover:shadow-md py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
               >
                 Get started
-              </a>
-              <a href="#" className="text-sm font-semibold leading-6 text-gray-100">
-                Learn more <span className='text-gray-100' aria-hidden="true">→</span>
               </a>
             </div>
           </div>

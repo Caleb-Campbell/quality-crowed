@@ -41,7 +41,11 @@ export const crowRouter = createTRPCRouter({
                 },
                 include: {
                     preflightQuestions: true,
-                    steps: true,
+                    steps: {
+                        include: {
+                            snippet: true,
+                        }
+                    },
                     prQuestions: true,
                 }
             })
