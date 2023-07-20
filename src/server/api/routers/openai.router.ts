@@ -15,7 +15,7 @@ export const openaiRouter = createTRPCRouter({
   }))
   .mutation(
     async ({ input }) => {
-      const questions = await createQuestions({prompt: input.prompt})
+      const questions = await createQuestions({ prompt: input.prompt, crowId: input.crowId })
       if(questions) {
         // create preflight questions list in db where crowId is
         questions.forEach(async (question: any) => {
