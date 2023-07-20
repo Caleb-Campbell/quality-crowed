@@ -70,4 +70,22 @@ export const stepRouter = createTRPCRouter({
     }
     ),
 
+    updateSnippet: publicProcedure
+    .input(z.object({
+        snippetId: z.string(),
+        content: z.string(),
+    }))
+    .mutation( async ({ input }) => {
+        const snippet = await prisma.snippet.update({
+            where: {
+                id: input.snippetId
+            },
+            data: {
+                content: input.content
+            }
+        })
+        return snippet
+    }
+    ),
+
 })

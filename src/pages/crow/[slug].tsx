@@ -16,10 +16,13 @@ import { Preflight } from '~/components/micro/preflights'
 import { SettingsBar } from '~/components/micro/settingsBar'
 import { Modal } from '~/components/micro/Modal'
 import { Trash2, X } from 'lucide-react'
-import { Editor } from '@monaco-editor/react'
+import CodeEditor from '@uiw/react-textarea-code-editor';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '~/components/ui/dialog'
 import { DialogHeader } from '~/components/ui/dialog'
 import { Snippet, Step } from '@prisma/client'
+import { Editor } from '@monaco-editor/react'
+import { Collapsible, CollapsibleTrigger } from '~/components/ui/collapsible'
+import { CollapsibleContent } from '@radix-ui/react-collapsible'
 
 type StepWithSnippet = Step & {snippet: Snippet[]}
  
@@ -32,6 +35,7 @@ export default function Page() {
     title: '',
     content: ''
   })
+  const [selectedSnippet, setSelectedSnippet] = useState<Snippet | undefined>(undefined)
 
   const router = useRouter()
   const context = api.useContext()
@@ -58,6 +62,7 @@ export default function Page() {
   const createStep = api.step.createStep.useMutation()
   const newSnippet = api.step.createSnippet.useMutation()
   const deleteSnippet = api.step.deleteSnippet.useMutation()
+  const updateSnippet = api.step.updateSnippet.useMutation()
   
   const deleteCrow = () => {
     deleteHandler.mutate({id: crow as string}, {
@@ -93,9 +98,24 @@ export default function Page() {
     setTechInput('')
   }
 
-  const createNewSnippet = () => {
+  const handleSnippetClick = async (snippet: Snippet, snippetId: string) => {
+    if(selectedSnippet){
+      const oldSnippet = selectedSnippet
+      setSelectedSnippet(snippet)
+      await updateSnippet.mutateAsync({snippetId, content: oldSnippet.content}, {
+        onSuccess: () => {
+          context.crow.invalidate()
+        }
+      })
+    }
+    else {
+      setSelectedSnippet(snippet)
+    }
+  }
+
+  const createNewSnippet = (id: string) => {
     if(!data?.steps[0]?.id) return console.error('no step id')
-    newSnippet.mutate({stepId: data!.steps[0]?.id}, {
+    newSnippet.mutate({stepId: id}, {
       onSuccess: () => {
         context.crow.invalidate()
       }
@@ -211,25 +231,29 @@ export default function Page() {
           }
           {
             data?.steps.map((step: any) => (
-              <div className='bg-gray-100 opacity-70 mt-10 p-10 h-[720px] overflow-y-scroll rounded-xl'>
+              <div className='bg-gray-100 opacity-70 mt-10 p-10 h-fit overflow-y-scroll rounded-xl'>
+                <Collapsible title={step.title} className='mb-10'>
+                  <CollapsibleTrigger className=' p-1 w-full'>
                 <p className='text-foreground text-center text-xl mb-3'>{step.title}</p>
-                    <Button onClick={createNewSnippet} className='w-full mb-10'>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className='bg-background p-10 overflow-y-scroll'>
+                    <Button onClick={()=>createNewSnippet(step.id)} className='w-full mb-10'>
                       Add Code Snippet
                     </Button>
                     <div className='flex flex-col gap-20'>
                       {
                         step.snippet && step.snippet.map((snip: Snippet) => {
                           return (
-                            <div key={snip.id} className='h-[200px]'>
-                            <Editor
-                              defaultValue={snip.content}
-                              language='typescript'
-                              theme='dark'
-                              className='max-h-[300px] rounded-xl'
-                              value={'this doesnt currently save'}
-                              onChange={(e) => console.log(e
-                                )}
-                                />
+                            <div key={snip.id} className='h-[200px]' onClick={()=>handleSnippetClick(snip, snip.id)} >
+                              <Editor
+                                height={'30vh'}
+                                width={`100%`}
+                                language={"typescript"}
+                                value={selectedSnippet?.content}
+                                theme={'dark'}
+                                defaultValue={snip.content}
+                                onChange={(e)=>setSelectedSnippet({...selectedSnippet!, content: e! })}
+                              />
                               <div className='mb-0 flex justify-end'>
                                 <Button onClick={()=>removeSnippet(snip.id)} className='w-2/12 p-0' variant='ghost'><Trash2 /></Button>
                               </div>
@@ -238,6 +262,8 @@ export default function Page() {
                           })
                       }
                     </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             ))
           }
