@@ -15,7 +15,7 @@ import PreflightList from '~/components/micro/preflights'
 import { Preflight } from '~/components/micro/preflights'
 import { SettingsBar } from '~/components/micro/settingsBar'
 import { Modal } from '~/components/micro/Modal'
-import { Trash2, X } from 'lucide-react'
+import { ArrowDownNarrowWide, Trash2, X } from 'lucide-react'
 import CodeEditor from '@uiw/react-textarea-code-editor';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '~/components/ui/dialog'
 import { DialogHeader } from '~/components/ui/dialog'
@@ -23,6 +23,7 @@ import { Snippet, Step } from '@prisma/client'
 import { Editor } from '@monaco-editor/react'
 import { Collapsible, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { CollapsibleContent } from '@radix-ui/react-collapsible'
+import { set } from 'zod'
 
 type StepWithSnippet = Step & {snippet: Snippet[]}
  
@@ -35,7 +36,7 @@ export default function Page() {
     title: '',
     content: ''
   })
-  const [selectedSnippet, setSelectedSnippet] = useState<Snippet | undefined>(undefined)
+  const [selectedSnippet, setSelectedSnippet] = useState<string | undefined>(undefined)
 
   const router = useRouter()
   const context = api.useContext()
@@ -98,21 +99,6 @@ export default function Page() {
     setTechInput('')
   }
 
-  const handleSnippetClick = async (snippet: Snippet, snippetId: string) => {
-    if(selectedSnippet){
-      const oldSnippet = selectedSnippet
-      setSelectedSnippet(snippet)
-      await updateSnippet.mutateAsync({snippetId, content: oldSnippet.content}, {
-        onSuccess: () => {
-          context.crow.invalidate()
-        }
-      })
-    }
-    else {
-      setSelectedSnippet(snippet)
-    }
-  }
-
   const createNewSnippet = (id: string) => {
     if(!data?.steps[0]?.id) return console.error('no step id')
     newSnippet.mutate({stepId: id}, {
@@ -140,6 +126,17 @@ export default function Page() {
     setStepTitleInput({
       title: '',
       content: ''
+    })
+  }
+
+  const handleUpdateSnippet = (id: string) => {
+    const stuff = selectedSnippet!
+    setSelectedSnippet(undefined)
+    if(!selectedSnippet) return console.error('no snippet')
+    updateSnippet.mutate({snippetId: id, content: stuff}, {
+      onSuccess: () => {
+        context.crow.invalidate()
+      }
     })
   }
 
@@ -231,31 +228,34 @@ export default function Page() {
           }
           {
             data?.steps.map((step: any) => (
-              <div className='bg-gray-100 opacity-70 mt-10 p-10 h-fit overflow-y-scroll rounded-xl'>
+              <div className='opacity-70 mt-10 p-10 h-fit rounded-xl'>
                 <Collapsible title={step.title} className='mb-10'>
                   <CollapsibleTrigger className=' p-1 w-full'>
-                <p className='text-foreground text-center text-xl mb-3'>{step.title}</p>
+                <p className='text-primary-foreground text-center text-xl w-full mb-3 underline'>{step.title} <ArrowDownNarrowWide className='inline' color='white' /> </p>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className='bg-background p-10 overflow-y-scroll'>
+                  <CollapsibleContent className='overflow-auto p-10 rounded-xl'>
                     <Button onClick={()=>createNewSnippet(step.id)} className='w-full mb-10'>
                       Add Code Snippet
                     </Button>
-                    <div className='flex flex-col gap-20'>
+                    <div className='flex flex-col gap-20 pb-10'>
                       {
                         step.snippet && step.snippet.map((snip: Snippet) => {
                           return (
-                            <div key={snip.id} className='h-[200px]' onClick={()=>handleSnippetClick(snip, snip.id)} >
+                            <div key={snip.id} className='h-[200px] my-20' >
                               <Editor
                                 height={'30vh'}
-                                width={`100%`}
+                                className='w-full rounded-xl p-1'
                                 language={"typescript"}
-                                value={selectedSnippet?.content}
-                                theme={'dark'}
+                                value={selectedSnippet}
+                                theme={'vs-dark'}
                                 defaultValue={snip.content}
-                                onChange={(e)=>setSelectedSnippet({...selectedSnippet!, content: e! })}
-                              />
+                                onChange={(e)=>setSelectedSnippet(e)}
+                                />
                               <div className='mb-0 flex justify-end'>
-                                <Button onClick={()=>removeSnippet(snip.id)} className='w-2/12 p-0' variant='ghost'><Trash2 /></Button>
+                                <Button onClick={()=>handleUpdateSnippet(snip.id)}>
+                                  Save
+                                </Button>
+                                <Button onClick={()=>removeSnippet(snip.id)} className='w-1/12 p-0 mx-2' variant='ghost'><Trash2 /></Button>
                               </div>
                             </div>
                                 )
@@ -267,7 +267,6 @@ export default function Page() {
               </div>
             ))
           }
-          {/* <Editor language='typescript' theme='dark' className='max-h-[300px]' /> */}
         </div>
       </TabsContent>
       <TabsContent className='min-h-[65vh]' value="pr">
